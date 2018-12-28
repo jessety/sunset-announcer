@@ -13,42 +13,44 @@ class SunsetAnnouncer {
       settings = {};
     }
 
-    // How far in advance to mention the sunrise / sunset?
-    if (settings.advance === undefined) {
-      settings.advance = 5; // 5 minutes
-    }
-
-    // How often should we attempt to update location (and recalculate sunset time)
-    if (settings.interval === undefined) {
-      settings.interval = 60; // every hour
+    // Do we want notifications for sunrises?
+    if (settings.SUNRISES === undefined) {
+      settings.SUNRISES = true;
     }
 
     // Do we want notifications for sunsets?
-    if (settings.sunsets === undefined) {
-      settings.sunsets = true;
+    if (settings.SUNSETS === undefined) {
+      settings.SUNSETS = true;
     }
 
-    // Do we want notifications for sunrises?
-    if (settings.sunrises === undefined) {
-      settings.sunrises = true;
+    // How far in advance to mention the sunrise / sunset?
+    if (settings.ADVANCE === undefined) {
+      settings.ADVANCE = 5; // 5 minutes
     }
 
-    // Do we want OS notifications?
-    if (settings.notifications === undefined) {
-      settings.notifications = true;
+    // How often should we attempt to update location (and recalculate sunset time)
+    if (settings.INTERVAL === undefined) {
+      settings.INTERVAL = 60; // every hour
     }
 
     // Do we want spoken notifications?
-    if (settings.speech === undefined) {
-      settings.speech = true;
+    if (settings.SPEECH === undefined) {
+      settings.SPEECH = true;
+    }
+
+    // Do we want OS notifications?
+    if (settings.NOTIFICATIONS === undefined) {
+      settings.NOTIFICATIONS = true;
     }
 
     // Whether or not to use the console
-    if (settings.verbose === undefined) {
-      settings.verbose = true;
+    if (settings.VERBOSE === undefined) {
+      settings.VERBOSE = true;
     }
 
     this.settings = settings;
+
+    this.log(`Loaded settings: `, settings);
 
     this.timers = [];
   }
@@ -59,7 +61,7 @@ class SunsetAnnouncer {
    */
   log(...messages) {
 
-    if (this.settings.verbose) {
+    if (this.settings.VERBOSE) {
 
       console.log(...messages);
     }
@@ -78,7 +80,7 @@ class SunsetAnnouncer {
 
       this.load();
 
-    }, this.settings.interval * 60 * 1000);
+    }, this.settings.INTERVAL * 60 * 1000);
 
     this.load();
   }
@@ -191,8 +193,8 @@ class SunsetAnnouncer {
 
     let msUntil = time.getTime() - now.getTime();
 
-    if (this.settings.advance > 0) {
-      msUntil -= this.settings.advance * 60 * 1000; // This setting is specified in minutes
+    if (this.settings.ADVANCE !== undefined) {
+      msUntil -= this.settings.ADVANCE * 60 * 1000; // This setting is specified in minutes
     }
 
     if (msUntil < 0) {
@@ -216,7 +218,7 @@ class SunsetAnnouncer {
    */
   notify(type) {
 
-    this.log(`Sending a notification for the ${type} that's going on right now`);
+    this.log(`Sending a notification for the ${type} that's going on right now (${new Date()})`);
 
     const notification = {
       title: `Look`,
@@ -224,20 +226,20 @@ class SunsetAnnouncer {
       icon: ``
     };
 
-    if (type === 'sunset') {
+    if (type === 'sunrise') {
 
-      notification.message = `The sun is setting`;
+      notification.message = `The sun is rising`;
 
     } else if (type === 'sunset') {
 
-      notification.message = `The sun is rising`;
+      notification.message = `The sun is settings`;
     }
 
-    if (this.settings.notifications !== false) {
+    if (this.settings.NOTIFICATIONS !== false) {
       notifier.notify(notification);
     }
 
-    if (this.settings.speech !== false) {
+    if (this.settings.SPEECH !== false) {
       say.speak(notification.message);
     }
   }
